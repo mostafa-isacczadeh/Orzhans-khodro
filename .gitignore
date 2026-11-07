@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Local backups and temporary files
+backups/
+*.backup
+*.disabled
+*.tsbuildinfo
+.env*.backup
+*.bak
