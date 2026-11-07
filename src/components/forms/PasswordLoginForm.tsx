@@ -39,8 +39,7 @@ export default function PasswordLoginForm() {
           className="input"
         />
         <p className="mt-1 text-xs text-slate-500">
-          مشتری و تعمیرگاه: ۳ تا ۵ رقم؛ مدیر کل: حداقل ۵ رقم.
-          در دستگاه مورداعتماد، رمز لازم نیست.
+          رمز عبور باید سه تا پنج رقمی باشد.
         </p>
       </div>
       <p className="rounded-lg bg-amber-50 p-3 text-xs leading-6 text-amber-800">
