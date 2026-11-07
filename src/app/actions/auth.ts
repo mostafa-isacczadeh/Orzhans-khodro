@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { otpCodes, users, garages } from "@/db/schema";
+import { otpCodes, users, garages, loginAttempts } from "@/db/schema";
 import {
   ADMIN_PHONE,
   createSession,
@@ -13,6 +13,10 @@ import {
   homeFor,
   isValidPhone,
   normalizePhone,
+  hashPassword,
+  registerTrustedDevice,
+  isTrustedDevice,
+  verifyPassword,
 } from "@/lib/auth";
 
 export type OtpState = {
@@ -205,6 +209,184 @@ export async function otpAction(prev: OtpState, formData: FormData): Promise<Otp
 
 export type SimpleState = { error?: string; ok?: string };
 
+
+
+function loginPhoneHash(phone: string): string {
+  const secret = process.env.OTP_SECRET;
+  if (!secret || Buffer.byteLength(secret, "utf8") < 32) {
+    throw new Error("OTP_SECRET is missing or too short");
+  }
+  return createHmac("sha256", secret)
+    .update(`login-attempt:${phone}`)
+    .digest("hex");
+}
+
+async function isLoginLocked(phoneHash: string): Promise<boolean> {
+  const [row] = await db.select({ lockedUntil: loginAttempts.lockedUntil })
+    .from(loginAttempts)
+    .where(eq(loginAttempts.phoneHash, phoneHash))
+    .limit(1);
+  return Boolean(row?.lockedUntil && row.lockedUntil > new Date());
+}
+
+async function recordLoginFailure(phoneHash: string): Promise<void> {
+  await db.execute(sql`
+    INSERT INTO login_attempts
+      (phone_hash, failed_attempts, window_started_at, locked_until, updated_at)
+    VALUES (${phoneHash}, 1, now(), NULL, now())
+    ON CONFLICT (phone_hash) DO UPDATE SET
+      failed_attempts = CASE
+        WHEN login_attempts.window_started_at <= now() - interval '15 minutes'
+        THEN 1 ELSE login_attempts.failed_attempts + 1
+      END,
+      window_started_at = CASE
+        WHEN login_attempts.window_started_at <= now() - interval '15 minutes'
+        THEN now() ELSE login_attempts.window_started_at
+      END,
+      locked_until = CASE
+        WHEN (
+          CASE
+            WHEN login_attempts.window_started_at <= now() - interval '15 minutes'
+            THEN 1 ELSE login_attempts.failed_attempts + 1
+          END
+        ) >= 5
+        THEN now() + interval '15 minutes'
+        ELSE NULL
+      END,
+      updated_at = now()
+  `);
+}
+
+async function clearLoginFailures(phoneHash: string): Promise<void> {
+  await db.delete(loginAttempts)
+    .where(eq(loginAttempts.phoneHash, phoneHash));
+}
+
+export async function passwordLoginAction(
+  _: SimpleState,
+  formData: FormData
+): Promise<SimpleState> {
+  const phone = normalizePhone(String(formData.get("phone") || ""));
+  const password = String(formData.get("password") || "");
+
+  if (!isValidPhone(phone)) {
+    return { error: "شماره موبایل یا رمز عبور صحیح نیست." };
+  }
+
+  const phoneHash = loginPhoneHash(phone);
+
+  if (password.length > 128) {
+    if (!(await isLoginLocked(phoneHash))) {
+      await recordLoginFailure(phoneHash);
+    }
+    return { error: "شماره موبایل یا رمز عبور صحیح نیست." };
+  }
+
+  if (phone === ADMIN_PHONE) {
+    const [admin] = await db.select().from(users)
+      .where(and(eq(users.phone, phone), eq(users.role, "admin")))
+      .limit(1);
+
+    if (!admin || admin.isBlocked) {
+      return { error: "حساب مدیر کل هنوز راه‌اندازی نشده است." };
+    }
+
+    if (await isTrustedDevice(admin.id)) {
+      await clearLoginFailures(phoneHash);
+      await createSession(admin.id);
+      redirect("/admin");
+    }
+
+    if (await isLoginLocked(phoneHash)) {
+      return { error: "تعداد تلاش‌های ناموفق زیاد است. ۱۵ دقیقه دیگر دوباره تلاش کنید." };
+    }
+
+    if (!/^\d{5,128}$/.test(password) ||
+        !admin.passwordHash || !verifyPassword(password, admin.passwordHash)) {
+      await recordLoginFailure(phoneHash);
+      return { error: "شماره موبایل یا رمز عبور صحیح نیست." };
+    }
+
+    await clearLoginFailures(phoneHash);
+    await createSession(admin.id);
+    await registerTrustedDevice(admin.id);
+    redirect("/admin");
+  }
+
+  let [user] = await db.select().from(users)
+    .where(eq(users.phone, phone))
+    .limit(1);
+
+  if (user) {
+    if (user.isBlocked) {
+      return { error: "حساب کاربری شما مسدود است." };
+    }
+
+    const trusted = await isTrustedDevice(user.id);
+
+    if (trusted) {
+      await clearLoginFailures(phoneHash);
+    }
+
+    if (!trusted) {
+      if (await isLoginLocked(phoneHash)) {
+        return { error: "تعداد تلاش‌های ناموفق زیاد است. ۱۵ دقیقه دیگر دوباره تلاش کنید." };
+      }
+
+      if (!/^\d{3,5}$/.test(password) ||
+          !user.passwordHash || !verifyPassword(password, user.passwordHash)) {
+        await recordLoginFailure(phoneHash);
+        return { error: "شماره موبایل یا رمز عبور صحیح نیست." };
+      }
+
+      await clearLoginFailures(phoneHash);
+      await registerTrustedDevice(user.id);
+    }
+
+    await createSession(user.id);
+
+    if (!user.name) redirect("/onboarding");
+    redirect(homeFor(user.role, user.phone));
+  }
+
+  if (await isLoginLocked(phoneHash)) {
+    return { error: "تعداد تلاش‌های ناموفق زیاد است. ۱۵ دقیقه دیگر دوباره تلاش کنید." };
+  }
+
+  if (!/^\d{3,5}$/.test(password)) {
+    await recordLoginFailure(phoneHash);
+    return { error: "رمز عبور باید فقط شامل ۳ تا ۵ رقم انگلیسی باشد." };
+  }
+
+  const newUser = await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${phone}))`);
+
+    const [existing] = await tx.select().from(users)
+      .where(eq(users.phone, phone))
+      .limit(1);
+
+    if (existing) return null;
+
+    const [created] = await tx.insert(users).values({
+      phone,
+      role: "customer",
+      passwordHash: hashPassword(password),
+    }).returning();
+
+    return created ?? null;
+  });
+
+  if (!newUser) {
+    await recordLoginFailure(phoneHash);
+    return { error: "شماره موبایل یا رمز عبور صحیح نیست. دوباره تلاش کنید." };
+  }
+
+  await clearLoginFailures(phoneHash);
+  await createSession(newUser.id);
+  await registerTrustedDevice(newUser.id);
+  redirect("/onboarding");
+}
+
 export async function onboardingAction(_: SimpleState, formData: FormData): Promise<SimpleState> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -223,4 +405,82 @@ export async function onboardingAction(_: SimpleState, formData: FormData): Prom
 export async function logoutAction() {
   await destroySession();
   redirect("/");
+}
+
+
+export async function adminSetupAction(
+  _: SimpleState,
+  formData: FormData
+): Promise<SimpleState> {
+  const setupSecret = String(formData.get("setupSecret") || "");
+  const configuredSecret = process.env.ADMIN_SETUP_SECRET || "";
+  const password = String(formData.get("password") || "");
+
+  if (!isValidPhone(ADMIN_PHONE)) {
+    return { error: "تنظیمات شماره مدیر کل معتبر نیست." };
+  }
+
+  if (
+    !configuredSecret ||
+    Buffer.byteLength(configuredSecret, "utf8") < 32 ||
+    Buffer.byteLength(setupSecret, "utf8") !== Buffer.byteLength(configuredSecret, "utf8") ||
+    !timingSafeEqual(Buffer.from(setupSecret, "utf8"), Buffer.from(configuredSecret, "utf8"))
+  ) {
+    return { error: "کلید راه‌اندازی معتبر نیست." };
+  }
+
+  if (!/^\d{5,128}$/.test(password)) {
+    return { error: "رمز مدیر کل باید حداقل ۵ رقم انگلیسی باشد." };
+  }
+
+  const passwordHash = hashPassword(password);
+
+  const userId = await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('main-admin-bootstrap'))`);
+
+    const [mainAdmin] = await tx
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.phone, ADMIN_PHONE), eq(users.role, "admin")))
+      .limit(1);
+
+    if (mainAdmin) return null;
+
+    const [existing] = await tx
+      .select()
+      .from(users)
+      .where(eq(users.phone, ADMIN_PHONE))
+      .limit(1);
+
+    if (existing?.isBlocked) return null;
+
+    if (existing) {
+      const [updated] = await tx
+        .update(users)
+        .set({ role: "admin", passwordHash })
+        .where(eq(users.id, existing.id))
+        .returning({ id: users.id });
+
+      return updated?.id ?? null;
+    }
+
+    const [created] = await tx
+      .insert(users)
+      .values({
+        phone: ADMIN_PHONE,
+        role: "admin",
+        passwordHash,
+      })
+      .returning({ id: users.id });
+
+    return created?.id ?? null;
+  });
+
+  if (!userId) {
+    return { error: "راه‌اندازی قبلاً انجام شده یا امکان ساخت حساب وجود ندارد." };
+  }
+
+  await createSession(userId);
+  await registerTrustedDevice(userId);
+  redirect("/admin");
 }

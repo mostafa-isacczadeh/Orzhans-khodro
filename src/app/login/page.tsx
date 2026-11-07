@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, homeFor } from "@/lib/auth";
-import OtpForm from "@/components/forms/OtpForm";
+import PasswordLoginForm from "@/components/forms/PasswordLoginForm";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +13,9 @@ export default async function LoginPage() {
         <div className="mb-6 text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-500 text-2xl">🚗</div>
           <h1 className="mt-3 text-xl font-extrabold">ورود یا ثبت‌نام</h1>
-          <p className="mt-1 text-sm text-slate-500">با شماره موبایل خود وارد شوید. اگر حساب ندارید، ساخته می‌شود.</p>
+          <p className="mt-1 text-sm text-slate-500">با شماره موبایل و رمز عبور وارد شوید یا حساب جدید بسازید.</p>
         </div>
-        <OtpForm />
+        <PasswordLoginForm />
       </div>
     </div>
   );

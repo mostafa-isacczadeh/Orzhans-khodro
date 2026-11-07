@@ -14,6 +14,7 @@ import {
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   phone: text("phone").notNull().unique(),
+  passwordHash: text("password_hash"),
   name: text("name").notNull().default(""),
   role: text("role").notNull().default("customer"),
   isBlocked: boolean("is_blocked").notNull().default(false),
@@ -36,6 +37,30 @@ export const sessions = pgTable("sessions", {
     .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(),
 });
+
+export const loginAttempts = pgTable("login_attempts", {
+  id: serial("id").primaryKey(),
+  phoneHash: text("phone_hash").notNull().unique(),
+  failedAttempts: integer("failed_attempts").notNull().default(0),
+  windowStartedAt: timestamp("window_started_at").notNull().defaultNow(),
+  lockedUntil: timestamp("locked_until"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const trustedDevices = pgTable(
+  "trusted_devices",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    lastUsedAt: timestamp("last_used_at").notNull().defaultNow(),
+  },
+  (t) => [index("trusted_devices_user_id_idx").on(t.userId)]
+);
 
 // status: pending | approved | suspended
 export const garages = pgTable("garages", {

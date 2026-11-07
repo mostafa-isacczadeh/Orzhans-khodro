@@ -1,10 +1,10 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
-import { sessions, users, garages, type User } from "@/db/schema";
+import { sessions, users, garages, trustedDevices, type User } from "@/db/schema";
 
 const COOKIE = "garage_session";
 
@@ -33,6 +33,76 @@ export function normalizePhone(input: string): string {
 
 export function isValidPhone(p: string) {
   return /^09\d{9}$/.test(p);
+}
+
+const TRUST_COOKIE = "garage_trusted_device";
+const TRUST_DAYS = 180;
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16);
+  const hash = scryptSync(password, salt, 64);
+  return `scrypt$${salt.toString("hex")}$${hash.toString("hex")}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  try {
+    const [algorithm, saltHex, hashHex] = stored.split("$");
+    if (algorithm !== "scrypt" || !/^[a-f0-9]{32}$/i.test(saltHex) ||
+        !/^[a-f0-9]{128}$/i.test(hashHex)) return false;
+
+    const expected = Buffer.from(hashHex, "hex");
+    const actual = scryptSync(password, Buffer.from(saltHex, "hex"), 64);
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+
+export async function registerTrustedDevice(userId: number) {
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + TRUST_DAYS * 86400000);
+
+  await db.insert(trustedDevices).values({
+    userId,
+    tokenHash: createHash("sha256").update(token).digest("hex"),
+    expiresAt,
+  });
+
+  const store = await cookies();
+  store.set(TRUST_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: expiresAt,
+  });
+}
+
+export async function isTrustedDevice(userId: number): Promise<boolean> {
+  const store = await cookies();
+  const token = store.get(TRUST_COOKIE)?.value;
+  if (!token) return false;
+
+  const tokenHash = createHash("sha256").update(token).digest("hex");
+  const now = new Date();
+
+  const [device] = await db
+    .select({ id: trustedDevices.id })
+    .from(trustedDevices)
+    .where(and(
+      eq(trustedDevices.userId, userId),
+      eq(trustedDevices.tokenHash, tokenHash),
+      gt(trustedDevices.expiresAt, now)
+    ))
+    .limit(1);
+
+  if (!device) return false;
+
+  await db.update(trustedDevices)
+    .set({ lastUsedAt: now })
+    .where(eq(trustedDevices.id, device.id));
+
+  return true;
 }
 
 function hashSessionToken(token: string): string {
