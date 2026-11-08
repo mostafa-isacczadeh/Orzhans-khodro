@@ -15,6 +15,13 @@
       "when": 1794057933883,
       "tag": "0001_tiny_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794096000000,
+      "tag": "0002_offer_available_dates",
+      "breakpoints": true
     }
   ]
 }

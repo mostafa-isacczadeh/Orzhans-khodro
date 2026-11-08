@@ -8,7 +8,7 @@ import { requireUser } from "@/lib/auth";
 import type { SimpleState } from "./auth";
 
 function validTehranDate(value: string): boolean {
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const d = new Date(value + "T12:00:00Z");
   return !Number.isNaN(d.getTime()) &&
     d.toISOString().slice(0, 10) === value;
@@ -47,11 +47,15 @@ export async function acceptOfferAction(_: SimpleState, formData: FormData): Pro
   if (row.req.customerId !== user.id) return { error: "دسترسی غیرمجاز" };
   if (row.req.status !== "open") return { error: "برای این درخواست قبلاً رزرو انجام شده است" };
   if (row.offer.status !== "pending") return { error: "این پیشنهاد دیگر معتبر نیست" };
-  if (row.garage.status !== "approved") return { error: "این تعمیرگاه در حال حاضر فعال نیست" };
+  if (row.garage.status === "suspended") return { error: "این تعمیرگاه در حال حاضر فعال نیست" };
 
-  const minDate = minimumBookingDate(row.offer.availableAfterDays ?? 0);
-  if (date < minDate) {
-    return { error: "تاریخ انتخاب‌شده زودتر از اولین روز آزاد تعمیرگاه است" };
+  const offeredDates = row.offer.availableDates ?? [];
+  if (offeredDates.length > 0 && !offeredDates.includes(date)) {
+    return { error: "این تاریخ در فهرست روزهای آزاد تعمیرگاه نیست" };
+  }
+  if (offeredDates.length === 0) {
+    const minDate = minimumBookingDate(row.offer.availableAfterDays ?? 0);
+    if (date < minDate) return { error: "تاریخ انتخاب‌شده زودتر از اولین روز آزاد تعمیرگاه است" };
   }
 
   const weekday = new Intl.DateTimeFormat("fa-IR", {

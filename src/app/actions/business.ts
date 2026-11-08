@@ -19,6 +19,7 @@ export async function saveGarageAction(_: SimpleState, formData: FormData): Prom
   const name = String(formData.get("name") || "").trim();
   const city = String(formData.get("city") || "").trim();
   const district = String(formData.get("district") || "").trim();
+  const validDistricts = ["شرق", "غرب", "شمال", "جنوب", "مرکز"];
   const address = String(formData.get("address") || "").trim();
   const phone = normalizePhone(String(formData.get("phone") || ""));
   const description = String(formData.get("description") || "").trim().slice(0, 2000);
@@ -29,6 +30,7 @@ export async function saveGarageAction(_: SimpleState, formData: FormData): Prom
 
   if (name.length < 2) return { error: "نام تعمیرگاه را وارد کنید" };
   if (!city) return { error: "شهر را انتخاب کنید" };
+  if (!validDistricts.includes(district)) return { error: "یکی از محدوده‌های شرق، غرب، شمال، جنوب یا مرکز را انتخاب کنید" };
   if (services.length === 0) return { error: "حداقل یک خدمت را انتخاب کنید" };
   if (!address) return { error: "آدرس دقیق را وارد کنید (فقط برای مدیریت قابل مشاهده است)" };
 
@@ -56,10 +58,15 @@ export async function submitOfferAction(_: SimpleState, formData: FormData): Pro
   if (garage.status === "suspended") return { error: "فعالیت تعمیرگاه شما تعلیق شده است و امکان ثبت پیشنهاد ندارید" };
   const requestId = Number(formData.get("requestId"));
   const price = toNum(formData.get("price"));
-  const availableAfterDays = toNum(formData.get("availableAfterDays"));
+  const availableDates = [...new Set(formData.getAll("availableDates").map((v) => String(v).trim()).filter(Boolean))];
+  const availableAfterDays = toNum(formData.get("availableAfterDays")) || 0;
   const estimatedDays = toNum(formData.get("estimatedDays")) || 1;
-  if (!Number.isInteger(availableAfterDays) || availableAfterDays < 0 || availableAfterDays > 365)
-    return { error: "اولین روز آزاد پذیرش باید بین صفر تا ۳۶۵ روز باشد" };
+  if (availableDates.length < 1 || availableDates.length > 10 || availableDates.some((date) => !/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T12:00:00Z`))))
+    return { error: "حداقل یک تاریخ معتبر و حداکثر ۱۰ تاریخ آزاد انتخاب کنید" };
+  if (availableDates.some((date) => new Date(date + "T12:00:00Z").getUTCDay() === 5))
+    return { error: "انتخاب روز جمعه برای پذیرش امکان‌پذیر نیست" };
+  const todayTehran = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  if (availableDates.some((date) => date <= todayTehran)) return { error: "تاریخ‌های آزاد باید از امروز به بعد باشند" };
   if (!Number.isInteger(estimatedDays) || estimatedDays < 1 || estimatedDays > 365)
     return { error: "مدت تعمیر باید بین ۱ تا ۳۶۵ روز باشد" };
   if (!(price >= 500000)) return { error: "مبلغ پیشنهادی معتبر نیست (حداقل ۵۰۰,۰۰۰ تومان)" };
@@ -78,10 +85,10 @@ export async function submitOfferAction(_: SimpleState, formData: FormData): Pro
       return { error: "امکان ویرایش این پیشنهاد وجود ندارد" };
     await db
       .update(offers)
-      .set({ price, availableAfterDays, estimatedDays, status: "pending", updatedAt: new Date() })
+      .set({ price, availableAfterDays, availableDates, estimatedDays, status: "pending", updatedAt: new Date() })
       .where(eq(offers.id, existing.id));
   } else {
-    await db.insert(offers).values({ requestId, garageId: garage.id, price, availableAfterDays, estimatedDays });
+    await db.insert(offers).values({ requestId, garageId: garage.id, price, availableAfterDays, availableDates, estimatedDays });
   }
   revalidatePath(`/business/board/${requestId}`);
   revalidatePath(`/business/board`);

@@ -8,7 +8,7 @@ import { canViewRequest } from "@/lib/queries";
 import { BOOKING_STATUS, OFFER_STATUS, REQUEST_STATUS } from "@/lib/constants";
 import { formatDate, formatToman, toFaDigits } from "@/lib/format";
 import { Badge, Notice, ServiceChips } from "@/components/ui";
-import { BookingBox, MediaGallery, MessageThread } from "@/components/shared";
+import { BookingBox, MediaGallery } from "@/components/shared";
 import OfferForm from "@/components/forms/OfferForm";
 import { SubmitButton } from "@/components/forms/common";
 import { withdrawOfferAction } from "@/app/actions/business";
@@ -108,6 +108,7 @@ export default async function BoardRequest({ params }: { params: Promise<{ id: s
                           price: myOffer.price,
                           estimatedDays: myOffer.estimatedDays,
                           availableAfterDays: myOffer.availableAfterDays,
+                          availableDates: myOffer.availableDates ?? [],
                         }
                       : null
                   }
@@ -124,7 +125,7 @@ export default async function BoardRequest({ params }: { params: Promise<{ id: s
             ) : myOffer ? (
               <div className="space-y-2 text-sm">
                 <div className="text-2xl font-black">{formatToman(myOffer.price)}</div>
-                <div>📅 اولین روز آزاد پذیرش: {toFaDigits(myOffer.availableAfterDays)} روز دیگر</div>
+                <div>📅 تاریخ‌های آزاد: {myOffer.availableDates?.length ? myOffer.availableDates.map((d) => formatDate(new Date(d + "T12:00:00Z"))).join("، ") : `${toFaDigits(myOffer.availableAfterDays)} روز دیگر`}</div>
                 <div>⏱ مدت انجام تعمیر: {toFaDigits(myOffer.estimatedDays)} روز</div>
               </div>
             ) : (
@@ -133,15 +134,6 @@ export default async function BoardRequest({ params }: { params: Promise<{ id: s
               </p>
             )}
           </div>
-          {req.customerId !== user.id && user.role !== "admin" && (
-            <MessageThread
-              requestId={req.id}
-              participantId={user.id}
-              viewerId={user.id}
-              path={`/business/board/${req.id}`}
-              hint="برای سؤال درباره جزئیات خودرو یا هماهنگی با مشتری، با پشتیبانی در ارتباط باشید."
-            />
-          )}
         </div>
       </div>
     </div>
