@@ -5,6 +5,17 @@ import { acceptOfferAction } from "@/app/actions/customer";
 import type { SimpleState } from "@/app/actions/auth";
 import { FormMessage, SubmitButton } from "./common";
 
+function fallbackDates(minDays: number) {
+  const out: string[] = [];
+  for (let i = Math.max(1, minDays); i <= Math.max(1, minDays) + 45 && out.length < 15; i++) {
+    const d = new Date(Date.now() + i * 86400000);
+    const value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+    const weekday = new Intl.DateTimeFormat("fa-IR", { timeZone: "Asia/Tehran", weekday: "long" }).format(d);
+    if (weekday !== "جمعه") out.push(value);
+  }
+  return formatAvailableDates(out);
+}
+
 function formatAvailableDates(values: string[]) {
   return values.map((value) => {
     const d = new Date(value + "T12:00:00Z");
@@ -28,7 +39,7 @@ export default function AcceptOfferForm({
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState<SimpleState, FormData>(acceptOfferAction, {});
   const [date, setDate] = useState("");
-  const dates = formatAvailableDates(availableDates);
+  const dates = availableDates.length ? formatAvailableDates(availableDates) : fallbackDates(availableAfterDays);
 
   if (!open)
     return <button onClick={() => setOpen(true)} className="btn-primary w-full">انتخاب این پیشنهاد و رزرو نوبت</button>;
@@ -50,7 +61,7 @@ export default function AcceptOfferForm({
           ))}
         </div>
       ) : (
-        <p className="text-xs text-slate-500">این پیشنهاد مربوط به نسخه قدیمی است؛ تاریخ‌های قابل انتخاب بر اساس اولین روز آزاد نمایش داده می‌شوند.</p>
+        <p className="text-xs text-slate-500"></p>
       )}
       {!date && <p className="text-xs text-slate-500">برای ادامه، یک تاریخ انتخاب کنید.</p>}
       <FormMessage state={state} />
