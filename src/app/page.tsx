@@ -20,7 +20,7 @@ export default async function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-l from-ink-900 via-ink-900/80 to-ink-900/30" />
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
-          <span className="badge bg-brand-500/20 text-brand-200 ring-1 ring-brand-400/40">ارزیابی هزینه ۱۰۰٪ رایگان</span>
+          <span className="badge bg-brand-500/20 text-brand-200 ring-1 ring-brand-400/40">برآورد هزینه و رزرو نوبت</span>
           <h1 className="mt-4 max-w-2xl text-3xl font-black leading-tight md:text-5xl md:leading-tight">
             عکس خودروت رو بفرست،
             <br />
@@ -32,7 +32,7 @@ export default async function Home() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href={cta} className="btn-primary !px-6 !py-3.5 text-base">
-              {user && user.role !== "customer" ? "ورود به پنل" : "شروع ارزیابی رایگان"}
+              {user && user.role !== "customer" ? "ورود به پنل" : "برآورد حدودی هزینه و رزرو نوبت"}
             </Link>
             <Link href="/garages" className="btn border border-white/20 !px-6 !py-3.5 text-base text-white hover:bg-white/10">
               مشاهده تعمیرگاه‌ها
@@ -64,7 +64,7 @@ export default async function Home() {
           <h2 className="text-center text-2xl font-extrabold">چطور کار می‌کند؟</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-4">
             {[
-              ["📱", "ثبت‌نام با شماره موبایل", "فقط با یک کد تأیید وارد شوید."],
+              ["📱", "ورود با شماره موبایل", "با شماره موبایل و رمز عبور وارد حساب خود شوید."],
               ["📸", "ارسال عکس و فیلم", "از آسیب‌دیدگی عکس و ویدیوی کوتاه بگیرید."],
               ["💰", "دریافت پیشنهادهای جداگانه", "هر تعمیرگاه مستقل و محرمانه قیمت می‌دهد."],
               ["📅", "انتخاب و رزرو نوبت", "بهترین پیشنهاد را انتخاب و زمان مراجعه را رزرو کنید."],
