@@ -193,7 +193,7 @@ export default async function RequestDetail({
                       </div>
                       {req.status === "open" && offer.status === "pending" && (
                         <div className="mt-4">
-                          <AcceptOfferForm offerId={offer.id} garageName={garage.name} availableAfterDays={offer.availableAfterDays} />
+                          <AcceptOfferForm offerId={offer.id} garageName={garage.name} availableAfterDays={offer.availableAfterDays} availableDates={offer.availableDates ?? []} />
                         </div>
                       )}
                     </div>
