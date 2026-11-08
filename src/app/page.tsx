@@ -22,9 +22,9 @@ export default async function Home() {
         <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
           <span className="badge bg-brand-500/20 text-brand-200 ring-1 ring-brand-400/40">برآورد هزینه و رزرو نوبت</span>
           <h1 className="mt-4 max-w-2xl text-3xl font-black leading-tight md:text-5xl md:leading-tight">
-            عکس خودروت رو بفرست،
+            از تصادف تا مثل روز اول!
             <br />
-            <span className="text-brand-400">از بهترین تعمیرگاه‌ها قیمت بگیر</span>
+            <span className="text-brand-400">خودرویت را به متخصصان بسپار</span>
           </h1>
           <p className="mt-5 max-w-xl text-slate-300 md:text-lg">
             صافکاری، نقاشی، دیتیلینگ و جوش پلاستیک. چند عکس و یک فیلم کوتاه بارگذاری کنید؛ تعمیرگاه‌های تأییدشده
