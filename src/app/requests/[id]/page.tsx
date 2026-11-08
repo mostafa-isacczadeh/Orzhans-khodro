@@ -8,7 +8,7 @@ import { getGarageStats } from "@/lib/queries";
 import { BOOKING_STATUS, OFFER_STATUS, REQUEST_STATUS } from "@/lib/constants";
 import { formatDate, formatToman, toFaDigits } from "@/lib/format";
 import { Badge, Notice, ServiceChips, Stars } from "@/components/ui";
-import { BookingBox, MediaGallery, MessageThread } from "@/components/shared";
+import { BookingBox, MediaGallery } from "@/components/shared";
 import AcceptOfferForm from "@/components/forms/AcceptOfferForm";
 import ReviewForm from "@/components/forms/ReviewForm";
 import { cancelRequestAction } from "@/app/actions/customer";
@@ -202,14 +202,6 @@ export default async function RequestDetail({
               </div>
             )}
           </div>
-
-          <MessageThread
-            requestId={req.id}
-            participantId={user.id}
-            viewerId={user.id}
-            path={`/requests/${req.id}`}
-            hint="سؤال، درخواست تغییر زمان یا هر مشکلی دارید، با پشتیبانی در میان بگذارید. پشتیبانی رابط شما و تعمیرگاه است."
-          />
         </div>
       </div>
     </div>
