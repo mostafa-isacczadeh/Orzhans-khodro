@@ -188,7 +188,7 @@ export default async function RequestDetail({
                       </div>
                       <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600">
                         <span>⏱ مدت کار: {toFaDigits(offer.estimatedDays)} روز</span>
-                        <span>📅 اولین روز آزاد پذیرش: {toFaDigits(offer.availableAfterDays)} روز دیگر</span>
+                        <span>📅 روزهای آزاد: {offer.availableDates?.length ? offer.availableDates.map((d) => formatDate(new Date(d + "T12:00:00Z"))).join("، ") : `${toFaDigits(offer.availableAfterDays)} روز دیگر`}</span>
                         <span>✔️ {toFaDigits(s.completed)} کار موفق</span>
                       </div>
                       {req.status === "open" && offer.status === "pending" && (
