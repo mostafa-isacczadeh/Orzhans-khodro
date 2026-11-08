@@ -61,7 +61,7 @@ export const GARAGE_STATUS: Record<string, { label: string; cls: string }> = {
 export const ROLE_LABEL: Record<string, string> = {
   customer: "مشتری",
   business: "صاحب کسب‌وکار",
-  admin: "مدیر کل",
+  admin: "مدیر فرعی",
 };
 
 export const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
