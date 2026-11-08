@@ -29,7 +29,7 @@ export default async function Home() {
             <span>ورود / ثبت‌نام</span>
           </Link>
           <Link href="/" className="home-brand" aria-label="اورژانس خودرو">
-            <div className="home-brand-mark"><span className="brand-car">⌁</span><span className="brand-wrench">🔧</span></div>
+            <div className="home-brand-mark"><svg viewBox="0 0 360 72" aria-hidden="true"><path d="M18 48c20-8 40-14 65-16 18-2 28-1 44 0 34-25 70-28 106-24 30 3 55 16 82 20l27 4-18 8c-21-2-43-7-63-14-42-15-89-12-126 10-30-2-56-1-79 8-14 5-24 9-38 8Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M305 8c-8-7-20-8-29-1-9 8-8 21 0 29l-34 28 8 8 31-34c9 5 20 3 26-5 6-8 5-19-2-25l-11 13-10-3-2-11Z" fill="currentColor"/></svg></div>
             <strong>اورژانس خودرو</strong>
             <small>سریع · مطمئن · حرفه‌ای</small>
           </Link>
