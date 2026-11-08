@@ -10,10 +10,6 @@ export default function AdminSetupForm() {
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label className="label" htmlFor="setupSecret">کلید راه‌اندازی محرمانه</label>
-        <input id="setupSecret" name="setupSecret" type="password" autoComplete="off" dir="ltr" minLength={32} className="input" required />
-      </div>
-      <div>
         <label className="label" htmlFor="password">رمز عبور مدیر کل</label>
         <input id="password" name="password" type="password" autoComplete="new-password" inputMode="numeric" pattern="[0-9]{5,128}" dir="ltr" minLength={5} maxLength={128} className="input" required />
         <p className="mt-1 text-xs text-slate-500">حداقل ۵ رقم انگلیسی.</p>
