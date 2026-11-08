@@ -173,7 +173,7 @@ export default async function AdminRequestDetail({ params }: { params: Promise<{
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-slate-600">
-                      📅 پذیرش: {toFaDigits(o.availableAfterDays)} روز دیگر · ⏱ تعمیر: {toFaDigits(o.estimatedDays)} روز
+                      📅 روزهای آزاد: {o.availableDates?.length ? o.availableDates.map((d) => formatDate(new Date(d + "T12:00:00Z"))).join("، ") : `${toFaDigits(o.availableAfterDays)} روز دیگر`} · ⏱ تعمیر: {toFaDigits(o.estimatedDays)} روز
                     </div>
                   </div>
                 ))}
