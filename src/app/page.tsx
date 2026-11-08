@@ -20,6 +20,9 @@ function HomeIcon({ type }: { type: string }) {
 export default async function Home() {
   const user = await getCurrentUser();
   const cta = user ? (user.role === "customer" ? "/requests/new" : homeFor(user.role, user.phone)) : "/login";
+  const notificationHref = !user ? "/login" : user.role === "admin" && user.phone === process.env.ADMIN_PHONE ? "/admin" : "/requests";
+  const notificationLabel = !user ? "ورود برای مشاهده اعلان‌ها" : user.role === "admin" && user.phone === process.env.ADMIN_PHONE ? "پنل مدیریت کل" : user.role === "business" ? "درخواست‌های جدید برای ارزیابی قیمت" : "پیگیری سفارش‌های من";
+  const notificationBadge = !user ? "ورود" : user.role === "admin" ? "مدیریت" : user.role === "business" ? "درخواست" : "سفارش";
   return (
     <div className="home-screen">
       <div className="home-shell">
