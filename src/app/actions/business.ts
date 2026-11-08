@@ -61,7 +61,7 @@ export async function submitOfferAction(_: SimpleState, formData: FormData): Pro
   const availableDates = [...new Set(formData.getAll("availableDates").map((v) => String(v).trim()).filter(Boolean))];
   const availableAfterDays = toNum(formData.get("availableAfterDays")) || 0;
   const estimatedDays = toNum(formData.get("estimatedDays")) || 1;
-  if (availableDates.length < 1 || availableDates.length > 10 || availableDates.some((date) => !/^\\d{4}-\\d{2}-\\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T12:00:00Z`))))
+  if (availableDates.length < 1 || availableDates.length > 10 || availableDates.some((date) => !/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T12:00:00Z`))))
     return { error: "حداقل یک تاریخ معتبر و حداکثر ۱۰ تاریخ آزاد انتخاب کنید" };
   if (availableDates.some((date) => new Date(date + "T12:00:00Z").getUTCDay() === 5))
     return { error: "انتخاب روز جمعه برای پذیرش امکان‌پذیر نیست" };
