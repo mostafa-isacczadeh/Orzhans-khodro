@@ -3,6 +3,7 @@ import ServiceWorkerRegister from './ServiceWorkerRegister';
 import type { ReactNode } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
+import HeaderGate from "@/components/HeaderGate";
 
 export const metadata: Metadata = {
   title: "اورژانس خودرو | ارزیابی رایگان صافکاری، نقاشی، دیتیلینگ و جوش پلاستیک",
@@ -25,15 +26,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
-        <Header />
         <ServiceWorkerRegister />
-        <main>{children}</main>
-        <footer className="mt-16 border-t border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row">
-            <p>© اورژانس خودرو — بازار آنلاین خدمات بدنه خودرو</p>
-            <p>صافکاری · نقاشی · دیتیلینگ · جوش پلاستیک</p>
-          </div>
-        </footer>
+        <HeaderGate
+          header={<Header />}
+          footer={<footer className="mt-16 border-t border-slate-200 bg-white"><div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500 sm:flex-row"><p>© اورژانس خودرو — بازار آنلاین خدمات بدنه خودرو</p><p>صافکاری · نقاشی · دیتیلینگ · جوش پلاستیک</p></div></footer>}
+        >
+          <main>{children}</main>
+        </HeaderGate>
       </body>
     </html>
   );
