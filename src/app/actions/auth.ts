@@ -412,21 +412,10 @@ export async function adminSetupAction(
   _: SimpleState,
   formData: FormData
 ): Promise<SimpleState> {
-  const setupSecret = String(formData.get("setupSecret") || "");
-  const configuredSecret = process.env.ADMIN_SETUP_SECRET || "";
   const password = String(formData.get("password") || "");
 
   if (!isValidPhone(ADMIN_PHONE)) {
     return { error: "تنظیمات شماره مدیر کل معتبر نیست." };
-  }
-
-  if (
-    !configuredSecret ||
-    Buffer.byteLength(configuredSecret, "utf8") < 32 ||
-    Buffer.byteLength(setupSecret, "utf8") !== Buffer.byteLength(configuredSecret, "utf8") ||
-    !timingSafeEqual(Buffer.from(setupSecret, "utf8"), Buffer.from(configuredSecret, "utf8"))
-  ) {
-    return { error: "کلید راه‌اندازی معتبر نیست." };
   }
 
   if (!/^\d{5,128}$/.test(password)) {
