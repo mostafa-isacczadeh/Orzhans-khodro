@@ -6,13 +6,13 @@ import Header from "@/components/Header";
 import HeaderGate from "@/components/HeaderGate";
 
 export const metadata: Metadata = {
-  title: "اورژانس خودرو | ارزیابی رایگان صافکاری، نقاشی، دیتیلینگ و جوش پلاستیک",
+  title: "اورژانس خودرو | سریع، مطمئن، حرفه‌ای",
   description:
-    "عکس و فیلم خودروی خود را بفرستید، از بهترین تعمیرگاه‌ها قیمت رایگان بگیرید، مقایسه کنید و آنلاین نوبت رزرو کنید.",
+    "برآورد حدودی هزینه و رزرو نوبت خدمات صافکاری و نقاشی خودرو.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#050505",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
