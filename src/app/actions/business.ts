@@ -19,6 +19,7 @@ export async function saveGarageAction(_: SimpleState, formData: FormData): Prom
   const name = String(formData.get("name") || "").trim();
   const city = String(formData.get("city") || "").trim();
   const district = String(formData.get("district") || "").trim();
+  const validDistricts = ["شرق", "غرب", "شمال", "جنوب", "مرکز"];
   const address = String(formData.get("address") || "").trim();
   const phone = normalizePhone(String(formData.get("phone") || ""));
   const description = String(formData.get("description") || "").trim().slice(0, 2000);
@@ -29,6 +30,7 @@ export async function saveGarageAction(_: SimpleState, formData: FormData): Prom
 
   if (name.length < 2) return { error: "نام تعمیرگاه را وارد کنید" };
   if (!city) return { error: "شهر را انتخاب کنید" };
+  if (!validDistricts.includes(district)) return { error: "یکی از محدوده‌های شرق، غرب، شمال، جنوب یا مرکز را انتخاب کنید" };
   if (services.length === 0) return { error: "حداقل یک خدمت را انتخاب کنید" };
   if (!address) return { error: "آدرس دقیق را وارد کنید (فقط برای مدیریت قابل مشاهده است)" };
 
