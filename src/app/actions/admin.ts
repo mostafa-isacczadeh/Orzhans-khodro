@@ -19,7 +19,7 @@ export async function setUserRoleAction(formData: FormData) {
   await requireMainAdmin();
   const id = Number(formData.get("userId"));
   const role = String(formData.get("role"));
-  if (!["customer", "business", "admin"].includes(role)) return;
+  if (!["customer", "business"].includes(role)) return;
   const [u] = await db.select().from(users).where(eq(users.id, id)).limit(1);
   if (!u || u.phone === ADMIN_PHONE) return;
   await db.update(users).set({ role }).where(eq(users.id, id));
