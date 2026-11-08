@@ -51,7 +51,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
                   </td>
                   <td className="p-3">
                     {locked ? (
-                      <span className="badge bg-ink-900 text-white">{ROLE_LABEL[u.role]}</span>
+                      <span className="badge bg-ink-900 text-white">مدیرکل اصلی</span>
                     ) : (
                       <form action={setUserRoleAction} className="flex gap-1">
                         <input type="hidden" name="userId" value={u.id} />
