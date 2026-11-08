@@ -2,12 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { bookings, garages, messages, offers, requestMedia, reviews, serviceRequests, users } from "@/db/schema";
+import { bookings, garages, offers, requestMedia, reviews, serviceRequests, users } from "@/db/schema";
 import { requireMainAdmin } from "@/lib/auth";
 import { BOOKING_STATUS, OFFER_STATUS, REQUEST_STATUS, TIME_SLOTS } from "@/lib/constants";
 import { formatDate, formatToman, toFaDigits } from "@/lib/format";
 import { Badge, ServiceChips, Stars } from "@/components/ui";
-import { BookingBox, MediaGallery, MessageThread } from "@/components/shared";
+import { BookingBox, MediaGallery } from "@/components/shared";
 import { SubmitButton } from "@/components/forms/common";
 import { adminRequestAction } from "@/app/actions/admin";
 
@@ -35,21 +35,6 @@ export default async function AdminRequestDetail({ params }: { params: Promise<{
     .orderBy(asc(offers.price));
   const [booking] = await db.select().from(bookings).where(eq(bookings.requestId, rid)).limit(1);
   const [review] = booking ? await db.select().from(reviews).where(eq(reviews.bookingId, booking.id)).limit(1) : [undefined];
-
-  // Threads: customer + any garage owners who messaged or offered
-  const msgParticipants = await db
-    .selectDistinct({ participantId: messages.participantId, name: users.name, role: users.role })
-    .from(messages)
-    .innerJoin(users, eq(users.id, messages.participantId))
-    .where(eq(messages.requestId, rid));
-  const threadMap = new Map<number, string>();
-  threadMap.set(row.customer.id, `مشتری: ${row.customer.name}`);
-  for (const o of offerRows) if (o.g.ownerId !== admin.id) threadMap.set(o.g.ownerId, `تعمیرگاه: ${o.g.name}`);
-  for (const p of msgParticipants) if (!threadMap.has(p.participantId) && p.participantId !== admin.id) threadMap.set(p.participantId, p.name);
-
-  // mark as read
-  await db.update(messages).set({ readByAdmin: true }).where(eq(messages.requestId, rid));
-
   const path = `/admin/requests/${rid}`;
   const scheduled = booking
     ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(booking.scheduledAt)
@@ -195,19 +180,6 @@ export default async function AdminRequestDetail({ params }: { params: Promise<{
               </div>
             )}
           </div>
-
-          {[...threadMap.entries()].map(([pid, label]) => (
-            <div key={pid} id={`thread-${pid}`}>
-              <MessageThread
-                requestId={req.id}
-                participantId={pid}
-                viewerId={admin.id}
-                path={path}
-                title={`گفتگو با ${label}`}
-                asAdmin
-              />
-            </div>
-          ))}
         </div>
       </div>
     </div>
