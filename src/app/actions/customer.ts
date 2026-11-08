@@ -49,9 +49,13 @@ export async function acceptOfferAction(_: SimpleState, formData: FormData): Pro
   if (row.offer.status !== "pending") return { error: "این پیشنهاد دیگر معتبر نیست" };
   if (row.garage.status === "suspended") return { error: "این تعمیرگاه در حال حاضر فعال نیست" };
 
-  const minDate = minimumBookingDate(row.offer.availableAfterDays ?? 0);
-  if (date < minDate) {
-    return { error: "تاریخ انتخاب‌شده زودتر از اولین روز آزاد تعمیرگاه است" };
+  const offeredDates = row.offer.availableDates ?? [];
+  if (offeredDates.length > 0 && !offeredDates.includes(date)) {
+    return { error: "این تاریخ در فهرست روزهای آزاد تعمیرگاه نیست" };
+  }
+  if (offeredDates.length === 0) {
+    const minDate = minimumBookingDate(row.offer.availableAfterDays ?? 0);
+    if (date < minDate) return { error: "تاریخ انتخاب‌شده زودتر از اولین روز آزاد تعمیرگاه است" };
   }
 
   const weekday = new Intl.DateTimeFormat("fa-IR", {
