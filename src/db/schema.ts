@@ -130,6 +130,7 @@ export const offers = pgTable(
     price: bigint("price", { mode: "number" }).notNull(),
     estimatedDays: integer("estimated_days").notNull().default(1),
     availableAfterDays: integer("available_after_days").notNull().default(0),
+    availableDates: text("available_dates").array().notNull().default([]),
 
     status: text("status").notNull().default("pending"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
