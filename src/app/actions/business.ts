@@ -65,6 +65,8 @@ export async function submitOfferAction(_: SimpleState, formData: FormData): Pro
     return { error: "حداقل یک تاریخ معتبر و حداکثر ۱۰ تاریخ آزاد انتخاب کنید" };
   if (availableDates.some((date) => new Date(date + "T12:00:00Z").getUTCDay() === 5))
     return { error: "انتخاب روز جمعه برای پذیرش امکان‌پذیر نیست" };
+  const todayTehran = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  if (availableDates.some((date) => date <= todayTehran)) return { error: "تاریخ‌های آزاد باید از امروز به بعد باشند" };
   if (!Number.isInteger(estimatedDays) || estimatedDays < 1 || estimatedDays > 365)
     return { error: "مدت تعمیر باید بین ۱ تا ۳۶۵ روز باشد" };
   if (!(price >= 500000)) return { error: "مبلغ پیشنهادی معتبر نیست (حداقل ۵۰۰,۰۰۰ تومان)" };
