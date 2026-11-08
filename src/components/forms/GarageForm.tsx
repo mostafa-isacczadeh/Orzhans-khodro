@@ -42,7 +42,10 @@ export default function GarageForm({ garage }: { garage: G }) {
           </div>
           <div>
             <label className="label">محدوده کلی</label>
-            <input name="district" defaultValue={garage?.district} className="input" placeholder="مثلاً غرب تهران" />
+            <select name="district" defaultValue={garage?.district ?? ""} className="input" required>
+              <option value="" disabled>انتخاب محدوده</option>
+              {["شرق", "غرب", "شمال", "جنوب", "مرکز"].map((area) => <option key={area} value={area}>{area}</option>)}
+            </select>
           </div>
         </div>
         <div className="md:col-span-2">
