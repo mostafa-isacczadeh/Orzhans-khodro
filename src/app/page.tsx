@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentUser, homeFor } from "@/lib/auth";
 import { HOME_HERO_IMAGE, HOME_MAP_IMAGE } from "@/lib/home-assets";
 
@@ -14,11 +15,64 @@ function HomeIcon({ type }: { type: string }) {
   if (type === "home") return <svg viewBox="0 0 48 48"><path d="M4 22 24 5l20 17v21H29V29H19v14H4Z" /></svg>;
   if (type === "car") return <svg viewBox="0 0 48 48"><path d="m8 27 4-12c1-3 3-5 6-5h12c3 0 5 2 6 5l4 12 3 4v9h-6v-5H11v5H5v-9Zm5-1h22l-3-10H16Zm1 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm20 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" /></svg>;
   if (type === "orders") return <svg viewBox="0 0 48 48"><path d="M12 5h18l8 8v30H12Z" /><path d="M29 5v10h9M18 23h14M18 30h14M18 37h9" /></svg>;
-  return <svg viewBox="0 0 48 48"><path d="m20 4 8 0 2 6 5 2 6-3 5 7-4 5 1 6 5 4-3 8-7-1-5 4-1 6h-8l-2-6-5-2-6 3-5-7 4-5-1-6-5-4 3-8 7 1 5-4Z" /><circle cx="24" cy="25" r="7" /></svg>;
+  if (type === "garage") return <svg viewBox="0 0 48 48"><path d="M5 20 24 7l19 13v22H5Z" /><path d="M15 42V25h18v17M19 31h10M19 36h10" /></svg>;
+  return <svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="8" /><path d="M8 42c1-10 7-16 16-16s15 6 16 16Z" /></svg>;
 }
 
 export default async function Home() {
   const user = await getCurrentUser();
+
+  if (user?.role === "customer") {
+    if (!user.name) redirect("/onboarding");
+    return (
+      <div className="customer-home">
+        <div className="customer-home-shell">
+          <header className="customer-header">
+            <Link href="/workspace" className="customer-bell" aria-label="اعلان‌ها و بخش‌های حساب"><BellIcon /></Link>
+            <Link href="/workspace" className="customer-profile" aria-label="حساب من"><UserIcon /></Link>
+            <Link href="/" className="customer-brand">
+              <span className="customer-brand-mark">🚘</span>
+              <span><strong>اورژانس خودرو</strong><small>سامانه هوشمند خدمات خودرو</small></span>
+            </Link>
+          </header>
+
+          <section className="customer-welcome">
+            <h1>سلام، {user.name} خوش آمدید</h1>
+            <p>برای شروع، درخواست تعمیر خودروی خود را ثبت کنید.</p>
+          </section>
+
+          <section className="customer-hero" aria-label="خودرو در تعمیرگاه">
+            <div className="customer-hero-photo" style={{ backgroundImage: `url("${HOME_HERO_IMAGE}")` }} />
+            <div className="customer-hero-overlay" />
+            <div className="customer-hero-caption">
+              <h2>تعمیر خودروی شما، آسان‌تر از همیشه</h2>
+              <p>از تعمیرگاه‌های مختلف قیمت بگیرید و پیشنهادها را مقایسه کنید.</p>
+            </div>
+          </section>
+
+          <Link href="/requests/new" className="customer-primary-cta">
+            <span className="customer-cta-icon">🔧</span>
+            <strong>ثبت درخواست تعمیر</strong>
+            <span className="customer-cta-arrow">‹</span>
+          </Link>
+
+          <section className="customer-trust">
+            <span className="customer-trust-icon">✓</span>
+            <div><strong>انتخاب آگاهانه، تعمیر مطمئن</strong><p>مقایسه قیمت و بررسی نمونه‌کار تعمیرگاه‌ها</p></div>
+          </section>
+
+          <nav className="customer-bottom-nav" aria-label="ناوبری اصلی مشتری">
+            <Link href="/" className="is-active" aria-current="page"><HomeIcon type="home" /><span>خانه</span></Link>
+            <Link href="/requests"><HomeIcon type="orders" /><span>سفارش‌ها</span></Link>
+            <Link href="/requests/new" className="customer-nav-create"><span>＋</span><small>ثبت سفارش</small></Link>
+            <Link href="/garages"><HomeIcon type="garage" /><span>تعمیرگاه‌ها</span></Link>
+            <Link href="/workspace"><HomeIcon type="profile" /><span>حساب من</span></Link>
+          </nav>
+        </div>
+      </div>
+    );
+  }
+
   const cta = user ? (user.role === "customer" ? "/requests/new" : homeFor(user.role, user.phone)) : "/login";
   const workspaceHref = user ? "/workspace" : "/login";
   return (
@@ -31,54 +85,21 @@ export default async function Home() {
           </Link>
           <Link href="/" className="home-brand" aria-label="اورژانس خودرو">
             <div className="home-brand-mark"><svg viewBox="0 0 360 72" aria-hidden="true"><path d="M18 48c20-8 40-14 65-16 18-2 28-1 44 0 34-25 70-28 106-24 30 3 55 16 82 20l27 4-18 8c-21-2-43-7-63-14-42-15-89-12-126 10-30-2-56-1-79 8-14 5-24 9-38 8Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/><path d="M305 8c-8-7-20-8-29-1-9 8-8 21 0 29l-34 28 8 8 31-34c9 5 20 3 26-5 6-8 5-19-2-25l-11 13-10-3-2-11Z" fill="currentColor"/></svg></div>
-            <strong>اورژانس خودرو</strong>
-            <small>سریع · مطمئن · حرفه‌ای</small>
+            <strong>اورژانس خودرو</strong><small>سریع · مطمئن · حرفه‌ای</small>
           </Link>
-          <Link href={workspaceHref} className="home-notifications" aria-label="ورود به بخش‌های اختصاصی">
-            <BellIcon />
-          </Link>
+          <Link href={workspaceHref} className="home-notifications" aria-label="ورود به بخش‌های اختصاصی"><BellIcon /></Link>
         </header>
-
         <section className="home-hero">
           <div className="home-hero-photo" style={{ backgroundImage: `url("${HOME_HERO_IMAGE}")` }} />
           <div className="home-hero-shade" />
-          <div className="home-hero-copy">
-            <h1>از تصادف تا<br /><em>مثل روز اول!</em></h1>
-            <div className="hero-underline" />
-            <ul>
-              <li><span>✓</span> تعمیرات تخصصی بدنه</li>
-              <li><span>✓</span> رنگ‌آمیزی با کیفیت</li>
-              <li><span>✓</span> تحویل به‌موقع</li>
-            </ul>
-          </div>
+          <div className="home-hero-copy"><h1>از تصادف تا<br /><em>مثل روز اول!</em></h1><div className="hero-underline" /><ul><li><span>✓</span> تعمیرات تخصصی بدنه</li><li><span>✓</span> رنگ‌آمیزی با کیفیت</li><li><span>✓</span> تحویل به‌موقع</li></ul></div>
         </section>
-
-        <Link href={cta} className="home-main-cta">
-          <span className="cta-symbols"><span>▦</span><i /> <span>▣</span></span>
-          <strong>{user && user.role !== "customer" ? "ورود به پنل مدیریت" : "برآورد حدودی هزینه و رزرو نوبت"}</strong>
-          <span className="cta-arrow">‹</span>
-        </Link>
-
+        <Link href={cta} className="home-main-cta"><span className="cta-symbols"><span>▦</span><i /><span>▣</span></span><strong>{user && user.role !== "customer" ? "ورود به پنل مدیریت" : "برآورد حدودی هزینه و رزرو نوبت"}</strong><span className="cta-arrow">‹</span></Link>
         <section className="home-info-grid">
-          <a className="home-info-card contact-card" href="tel:09046047979">
-            <div className="info-title"><span className="info-icon">☎</span><span>تماس با ما</span></div>
-            <strong dir="ltr">09046047979</strong>
-          </a>
-          <a className="home-info-card location-card" href="https://maps.google.com/?q=Qom%2C+Valiasr+Square" target="_blank" rel="noreferrer">
-            <div className="location-copy">
-              <div className="info-title"><span className="info-icon">●</span><span>مکان تعمیرگاه</span></div>
-              <strong>قم، میدان ولیعصر، ابتدای کوچه ۲</strong>
-            </div>
-            <img src={HOME_MAP_IMAGE} alt="نقشه شماتیک مکان تعمیرگاه در میدان ولیعصر قم" />
-          </a>
+          <a className="home-info-card contact-card" href="tel:09046047979"><div className="info-title"><span className="info-icon">☎</span><span>تماس با ما</span></div><strong dir="ltr">09046047979</strong></a>
+          <a className="home-info-card location-card" href="https://maps.google.com/?q=Qom%2C+Valiasr+Square" target="_blank" rel="noreferrer"><div className="location-copy"><div className="info-title"><span className="info-icon">●</span><span>مکان تعمیرگاه</span></div><strong>قم، میدان ولیعصر، ابتدای کوچه ۲</strong></div><img src={HOME_MAP_IMAGE} alt="نقشه شماتیک مکان تعمیرگاه در میدان ولیعصر قم" /></a>
         </section>
-
-        <nav className="home-bottom-nav" aria-label="ناوبری اصلی">
-          <Link href="/" className="active"><HomeIcon type="home" /><span>خانه</span></Link>
-          <Link href="/requests"><HomeIcon type="car" /><span>خودروهای من</span></Link>
-          <Link href="/requests"><HomeIcon type="orders" /><span>سفارش‌ها</span></Link>
-          <Link href="/dashboard"><HomeIcon type="settings" /><span>تنظیمات</span></Link>
-        </nav>
+        <nav className="home-bottom-nav" aria-label="ناوبری اصلی"><Link href="/" className="active"><HomeIcon type="home" /><span>خانه</span></Link><Link href="/requests"><HomeIcon type="car" /><span>خودروهای من</span></Link><Link href="/requests"><HomeIcon type="orders" /><span>سفارش‌ها</span></Link><Link href="/dashboard"><HomeIcon type="settings" /><span>تنظیمات</span></Link></nav>
       </div>
     </div>
   );
