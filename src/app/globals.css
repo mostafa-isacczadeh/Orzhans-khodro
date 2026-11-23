@@ -160,3 +160,42 @@ input[type="number"]::-webkit-inner-spin-button {
   .home-bottom-nav a{font-size:10px}
   .home-bottom-nav svg{width:26px;height:26px}
 }
+
+/* Customer dashboard approved black-and-gold design */
+.customer-home{min-height:100svh;background:#090909;color:#f7f3e9;padding:0 14px calc(104px + env(safe-area-inset-bottom));}
+.customer-home-shell{max-width:760px;margin:0 auto}
+.customer-header{height:82px;display:flex;align-items:center;gap:20px;border-bottom:1px solid #8b6a2b}
+.customer-brand{margin-right:auto;display:flex;align-items:center;gap:10px;color:#e6bb5b;text-decoration:none}
+.customer-brand strong,.customer-brand small{display:block}
+.customer-brand strong{font-size:21px;font-weight:900}
+.customer-brand small{font-size:10px;color:#c8b68e;margin-top:3px}
+.customer-brand-mark{font-size:31px;filter:sepia(1) saturate(2)}
+.customer-bell,.customer-profile{color:#e4b957;display:grid;place-items:center;width:34px;height:42px}
+.customer-bell svg,.customer-profile svg{width:29px;height:29px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.customer-profile svg circle{fill:#d9ad50;stroke:#d9ad50}
+.customer-welcome{text-align:right;padding:22px 2px 16px}
+.customer-welcome h1{font-size:clamp(20px,4.7vw,28px);font-weight:900;margin:0;color:#fff}
+.customer-welcome p{margin:7px 0 0;color:#b9b3a7;font-size:14px;line-height:1.8}
+.customer-hero{height:clamp(270px,70vw,430px);position:relative;overflow:hidden;border-radius:18px;border:1px solid #6b5127;background:#17130e}
+.customer-hero-photo{position:absolute;inset:0;background-size:cover;background-position:center 54%;transform:scale(1.01)}
+.customer-hero-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.91),rgba(0,0,0,.05) 72%),linear-gradient(90deg,rgba(0,0,0,.22),transparent 70%)}
+.customer-hero-caption{position:absolute;right:18px;left:18px;bottom:17px;text-align:right}
+.customer-hero-caption h2{font-size:clamp(19px,4.5vw,27px);font-weight:900;color:#edc46d;margin:0 0 7px}
+.customer-hero-caption p{font-size:13px;line-height:1.8;color:#f3eee4;margin:0;max-width:520px}
+.customer-primary-cta{margin:16px 0 18px;min-height:68px;border:1px solid #f0c35c;border-radius:16px;background:linear-gradient(105deg,#b9821f,#f0c65e 50%,#b47b1c);color:#17120a;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;text-decoration:none;box-shadow:0 5px 20px #c08c2833}
+.customer-primary-cta strong{font-size:19px;font-weight:950}
+.customer-cta-icon{font-size:25px}
+.customer-cta-arrow{font-size:34px;line-height:1}
+.customer-trust{display:flex;align-items:center;justify-content:center;gap:14px;text-align:right;padding:14px 4px 20px;border-top:1px solid #4d3c21}
+.customer-trust-icon{width:44px;height:44px;border:3px solid #d7a83e;border-radius:50%;display:grid;place-items:center;color:#e4b957;font-size:28px;font-weight:900;flex:none}
+.customer-trust strong{font-size:15px;color:#eee4cf}
+.customer-trust p{font-size:12px;color:#aaa398;margin:4px 0 0}
+.customer-bottom-nav{position:fixed;z-index:40;bottom:calc(7px + env(safe-area-inset-bottom));left:10px;right:10px;max-width:740px;margin:0 auto;min-height:76px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:6px 3px;border:1px solid #72572b;border-radius:22px;background:rgba(20,19,17,.96);box-shadow:0 0 18px #b9852b55;backdrop-filter:blur(14px)}
+.customer-bottom-nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;color:#a9a49a;text-decoration:none;font-size:10px;font-weight:700;white-space:nowrap}
+.customer-bottom-nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.customer-bottom-nav a.is-active{color:#edc15b}
+.customer-bottom-nav .customer-nav-create{gap:1px;color:#edc15b}
+.customer-nav-create>span{width:39px;height:39px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f5d37b,#b98020);color:#17120a;font-size:31px;line-height:1;box-shadow:0 0 0 4px #292116}
+.customer-nav-create small{font-size:10px;font-weight:800}
+@media(min-width:700px){.customer-home{padding-left:22px;padding-right:22px}.customer-header{height:94px}.customer-welcome{padding-top:30px}.customer-bottom-nav{bottom:14px}}
+@media(max-width:360px){.customer-home{padding-left:9px;padding-right:9px}.customer-brand strong{font-size:18px}.customer-header{gap:12px}.customer-bottom-nav a{font-size:9px}.customer-primary-cta strong{font-size:17px}}
