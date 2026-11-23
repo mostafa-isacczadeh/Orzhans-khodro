@@ -206,5 +206,5 @@ export async function getOwnGarage(userId: number) {
 export function homeFor(role: string, phone: string) {
   if (role === "admin") return phone === ADMIN_PHONE ? "/admin" : "/";
   if (role === "business") return "/business";
-  return "/requests";
+  return "/";
 }
